@@ -77,6 +77,8 @@ module.exports = {
         autoplay: { name: 'تشغيل تلقائي', aliases: ['تلقائي'], description: 'تبديل وضع التشغيل التلقائي' },
         clear: { name: 'مسح', aliases: ['حذف'], description: 'مسح قائمة الأغاني' },
         shuffle: { name: 'خلط', aliases: ['عشوائي'], description: 'خلط قائمة الأغاني' },
+        control: { name: 'تحكم', aliases: ['لوحة'], description: 'لوحة تحكم متقدمة' },
+        settings: { name: 'إعدادات', aliases: ['إعداد'], description: 'إعدادات البوت المتقدمة' },
         help: { name: 'مساعدة', aliases: ['ح', 'أوامر'], description: 'عرض جميع الأوامر المتاحة' }
       }
     },
@@ -116,6 +118,8 @@ module.exports = {
         autoplay: { name: 'autoplay', aliases: ['ap'], description: 'Toggle autoplay mode' },
         clear: { name: 'clear', aliases: ['cl'], description: 'Clear the music queue' },
         shuffle: { name: 'shuffle', aliases: ['random'], description: 'Shuffle the music queue' },
+        control: { name: 'control', aliases: ['ctrl', 'panel'], description: 'Advanced control panel' },
+        settings: { name: 'settings', aliases: ['config', 'setup'], description: 'Advanced bot settings' },
         help: { name: 'help', aliases: ['h', 'commands'], description: 'Show all available commands' }
       }
     }

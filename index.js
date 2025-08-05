@@ -63,6 +63,7 @@ class MusicBot {
     require('./events/messageCreate')(this.client);
     require('./events/ready')(this.client);
     require('./events/distube')(this.client, this.client.distube);
+    require('./events/interactionCreate')(this.client);
   }
 
   start() {

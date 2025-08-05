@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const config = require('../config');
 
 module.exports = {
@@ -15,6 +15,16 @@ module.exports = {
     }
 
     const botConfig = client.botConfig;
+    const page = args[0] ? parseInt(args[0]) : 1;
+    const songsPerPage = 10;
+    const totalPages = Math.ceil((queue.songs.length - 1) / songsPerPage);
+
+    if (page < 1 || page > totalPages) {
+      return message.reply(botConfig.language === 'ar' 
+        ? '❌ رقم الصفحة غير صحيح!'
+        : '❌ Invalid page number!');
+    }
+
     const embed = new EmbedBuilder()
       .setColor(config.embed.color)
       .setTitle(botConfig.language === 'ar' ? '📋 قائمة الأغاني' : '📋 Music Queue')
@@ -23,18 +33,21 @@ module.exports = {
     if (queue.songs.length === 1) {
       embed.setDescription(botConfig.language === 'ar' ? 'لا توجد أغاني في القائمة' : 'No songs in queue');
     } else {
-      const songs = queue.songs.slice(1, 11).map((song, index) => {
-        return `**${index + 1}.** ${song.name} - \`${song.formattedDuration}\``;
+      const startIndex = (page - 1) * songsPerPage + 1;
+      const endIndex = Math.min(startIndex + songsPerPage - 1, queue.songs.length - 1);
+      
+      const songs = queue.songs.slice(startIndex, endIndex + 1).map((song, index) => {
+        const globalIndex = startIndex + index - 1;
+        return `**${globalIndex}.** ${song.name} - \`${song.formattedDuration}\``;
       }).join('\n');
 
       embed.setDescription(songs);
       
-      if (queue.songs.length > 11) {
+      if (totalPages > 1) {
         embed.addFields({
-          name: botConfig.language === 'ar' ? 'والمزيد...' : 'And more...',
-          value: botConfig.language === 'ar' 
-            ? `${queue.songs.length - 11} أغاني أخرى في القائمة`
-            : `${queue.songs.length - 11} more songs in queue`
+          name: botConfig.language === 'ar' ? 'الصفحة' : 'Page',
+          value: `${page}/${totalPages}`,
+          inline: true
         });
       }
     }
@@ -45,6 +58,49 @@ module.exports = {
       inline: false
     });
 
-    message.reply({ embeds: [embed] });
+    // Queue control buttons
+    const queueButtons = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId('queue_shuffle')
+          .setLabel(botConfig.language === 'ar' ? '🔀 خلط' : '🔀 Shuffle')
+          .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId('queue_clear')
+          .setLabel(botConfig.language === 'ar' ? '🗑️ مسح' : '🗑️ Clear')
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId('queue_export')
+          .setLabel(botConfig.language === 'ar' ? '📤 تصدير' : '📤 Export')
+          .setStyle(ButtonStyle.Secondary)
+      );
+
+    // Navigation buttons
+    const navButtons = new ActionRowBuilder();
+    
+    if (totalPages > 1) {
+      navButtons.addComponents(
+        new ButtonBuilder()
+          .setCustomId(`queue_page_${Math.max(1, page - 1)}`)
+          .setLabel('◀️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === 1),
+        new ButtonBuilder()
+          .setCustomId(`queue_page_${Math.min(totalPages, page + 1)}`)
+          .setLabel('▶️')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(page === totalPages)
+      );
+    }
+
+    const components = [queueButtons];
+    if (navButtons.components.length > 0) {
+      components.push(navButtons);
+    }
+
+    message.reply({ 
+      embeds: [embed], 
+      components: components 
+    });
   }
 };

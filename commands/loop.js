@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const config = require('../config');
 
 module.exports = {
@@ -24,9 +24,65 @@ module.exports = {
       return message.reply(language.messages.notInSameChannel);
     }
 
+    const botConfig = client.botConfig;
+
+    if (!args.length) {
+      const embed = new EmbedBuilder()
+        .setColor(config.embed.color)
+        .setTitle(botConfig.language === 'ar' ? '🔁 إعدادات التكرار' : '🔁 Loop Settings')
+        .setDescription(botConfig.language === 'ar' 
+          ? 'اختر وضع التكرار المطلوب من القائمة أدناه'
+          : 'Select the desired loop mode from the menu below')
+        .addFields(
+          { 
+            name: botConfig.language === 'ar' ? 'الوضع الحالي' : 'Current Mode', 
+            value: queue.repeatMode === 0 ? (botConfig.language === 'ar' ? '🔂 معطل' : '🔂 Disabled') :
+                    queue.repeatMode === 1 ? (botConfig.language === 'ar' ? '🔁 تكرار الأغنية' : '🔁 Song Loop') :
+                    (botConfig.language === 'ar' ? '🔁 تكرار القائمة' : '🔁 Queue Loop'), 
+            inline: true 
+          },
+          { 
+            name: botConfig.language === 'ar' ? 'الخيارات المتاحة' : 'Available Options', 
+            value: botConfig.language === 'ar' 
+              ? '🔂 معطل | 🔁 أغنية | 🔁 قائمة'
+              : '🔂 Disabled | 🔁 Song | 🔁 Queue', 
+            inline: true 
+          }
+        )
+        .setFooter({ text: config.embed.footer });
+
+      // Create select menu for loop modes
+      const loopSelect = new StringSelectMenuBuilder()
+        .setCustomId('loop_mode')
+        .setPlaceholder(botConfig.language === 'ar' ? 'اختر وضع التكرار' : 'Select loop mode')
+        .addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setLabel(botConfig.language === 'ar' ? 'معطل' : 'Disabled')
+            .setDescription(botConfig.language === 'ar' ? 'لا تكرار' : 'No loop')
+            .setValue('0')
+            .setEmoji('🔂'),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(botConfig.language === 'ar' ? 'تكرار الأغنية' : 'Song Loop')
+            .setDescription(botConfig.language === 'ar' ? 'تكرار الأغنية الحالية' : 'Repeat current song')
+            .setValue('1')
+            .setEmoji('🔁'),
+          new StringSelectMenuOptionBuilder()
+            .setLabel(botConfig.language === 'ar' ? 'تكرار القائمة' : 'Queue Loop')
+            .setDescription(botConfig.language === 'ar' ? 'تكرار القائمة كاملة' : 'Repeat entire queue')
+            .setValue('2')
+            .setEmoji('🔁')
+        );
+
+      const row = new ActionRowBuilder().addComponents(loopSelect);
+
+      return message.reply({ 
+        embeds: [embed], 
+        components: [row] 
+      });
+    }
+
     const mode = args[0]?.toLowerCase();
     let newMode;
-    const botConfig = client.botConfig;
 
     if (!mode || mode === 'off') {
       newMode = 0;

@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const config = require('../config');
 
 module.exports = {
@@ -24,21 +24,73 @@ module.exports = {
       return message.reply(language.messages.notInSameChannel);
     }
 
+    const botConfig = client.botConfig;
+
     if (!args.length) {
-      const botConfig = client.botConfig;
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
         .setTitle(botConfig.language === 'ar' ? '🔊 مستوى الصوت الحالي' : '🔊 Current Volume')
-        .setDescription(`Volume: **${queue.volume}%**`)
+        .setDescription(`**${queue.volume}%**`)
+        .addFields(
+          { 
+            name: botConfig.language === 'ar' ? 'التحكم السريع' : 'Quick Controls', 
+            value: botConfig.language === 'ar' ? 'استخدم الأزرار أدناه للتحكم السريع' : 'Use the buttons below for quick control', 
+            inline: false 
+          }
+        )
         .setFooter({ text: config.embed.footer });
-      
-      return message.reply({ embeds: [embed] });
+
+      // Volume control buttons
+      const volumeButtons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('volume_down')
+            .setLabel('🔉 -10')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_up')
+            .setLabel('🔊 +10')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_mute')
+            .setLabel('🔇 Mute')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_max')
+            .setLabel('🔊 Max')
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+      // Fine control buttons
+      const fineButtons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('volume_25')
+            .setLabel('25%')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_50')
+            .setLabel('50%')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_75')
+            .setLabel('75%')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_100')
+            .setLabel('100%')
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+      return message.reply({ 
+        embeds: [embed], 
+        components: [volumeButtons, fineButtons] 
+      });
     }
 
     const volume = parseInt(args[0]);
     
     if (isNaN(volume) || volume < 0 || volume > 100) {
-      const botConfig = client.botConfig;
       const errorMsg = botConfig.language === 'ar' 
         ? '❌ يرجى تقديم مستوى صوت صحيح بين 0 و 100!'
         : '❌ Please provide a valid volume between 0 and 100!';
@@ -47,7 +99,6 @@ module.exports = {
 
     try {
       queue.setVolume(volume);
-      const botConfig = client.botConfig;
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
         .setTitle(botConfig.language === 'ar' ? '🔊 تم تغيير مستوى الصوت' : '🔊 Volume Changed')

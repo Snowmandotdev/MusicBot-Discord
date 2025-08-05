@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const config = require('../config');
 
 module.exports = (client, distube) => {
@@ -30,8 +30,45 @@ module.exports = (client, distube) => {
         )
         .setThumbnail(song.thumbnail)
         .setFooter({ text: config.embed.footer });
-      
-      queue.textChannel.send({ embeds: [embed] });
+
+      // Create interactive buttons
+      const buttons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('volume_down')
+            .setLabel('🔉 -10')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('volume_up')
+            .setLabel('🔊 +10')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('pause_resume')
+            .setLabel(queue.paused ? '▶️' : '⏸️')
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId('skip')
+            .setLabel('⏭️')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('loop')
+            .setLabel(queue.repeatMode ? '🔁' : '🔂')
+            .setStyle(queue.repeatMode ? ButtonStyle.Success : ButtonStyle.Secondary)
+        );
+
+      // Add stop button in second row
+      const stopButton = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('stop')
+            .setLabel(botConfig.language === 'ar' ? '⏹️ إيقاف' : '⏹️ Stop')
+            .setStyle(ButtonStyle.Danger)
+        );
+
+      queue.textChannel.send({ 
+        embeds: [embed], 
+        components: [buttons, stopButton] 
+      });
     })
     
     .on('addSong', (queue, song) => {
