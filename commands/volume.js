@@ -8,26 +8,27 @@ module.exports = {
   usage: '[0-100]',
   cooldown: 2,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     if (!args.length) {
+      const botConfig = client.botConfig;
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
-        .setTitle('🔊 Current Volume')
+        .setTitle(botConfig.language === 'ar' ? '🔊 مستوى الصوت الحالي' : '🔊 Current Volume')
         .setDescription(`Volume: **${queue.volume}%**`)
         .setFooter({ text: config.embed.footer });
       
@@ -37,21 +38,26 @@ module.exports = {
     const volume = parseInt(args[0]);
     
     if (isNaN(volume) || volume < 0 || volume > 100) {
-      return message.reply('❌ Please provide a valid volume between 0 and 100!');
+      const botConfig = client.botConfig;
+      const errorMsg = botConfig.language === 'ar' 
+        ? '❌ يرجى تقديم مستوى صوت صحيح بين 0 و 100!'
+        : '❌ Please provide a valid volume between 0 and 100!';
+      return message.reply(errorMsg);
     }
 
     try {
       queue.setVolume(volume);
+      const botConfig = client.botConfig;
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
-        .setTitle('🔊 Volume Changed')
-        .setDescription(`Volume set to: **${volume}%**`)
+        .setTitle(botConfig.language === 'ar' ? '🔊 تم تغيير مستوى الصوت' : '🔊 Volume Changed')
+        .setDescription(`${language.messages.volumeChanged} **${volume}%**`)
         .setFooter({ text: config.embed.footer });
       
       message.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Volume command error:', error);
-      message.reply('❌ An error occurred while changing volume!');
+      message.reply(language.messages.error);
     }
   }
 };

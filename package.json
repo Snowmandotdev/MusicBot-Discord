@@ -1,12 +1,19 @@
 {
   "name": "discord-music-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Professional Discord Music Bot with CommandKit and Distube",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "bot": "node start.js"
+    "bot": "node start.js",
+    "docker:build": "docker build -t discord-music-bot .",
+    "docker:run": "docker run -d --name discord-music-bot discord-music-bot",
+    "docker:compose": "docker-compose up -d",
+    "docker:logs": "docker-compose logs -f",
+    "docker:stop": "docker-compose down",
+    "test": "node test.js",
+    "prod": "node production.js"
   },
   "keywords": ["discord", "music", "bot", "discord.js", "commandkit", "distube"],
   "author": "Professional Developer",
@@ -24,7 +31,8 @@
     "sodium": "^3.0.2",
     "ytdl-core": "^4.11.5",
     "play-dl": "^1.9.7",
-    "spotify-web-api-node": "^5.0.2"
+    "spotify-web-api-node": "^5.0.2",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

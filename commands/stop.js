@@ -5,30 +5,30 @@ module.exports = {
   name: 'stop',
   aliases: ['leave', 'disconnect'],
   description: 'Stop playing and clear the queue',
-  cooldown: config.cooldowns.stop,
+  cooldown: 2,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     try {
       queue.stop();
-      message.reply('⏹️ Stopped playing and cleared the queue!');
+      message.reply(language.messages.playbackStopped);
     } catch (error) {
       console.error('Stop command error:', error);
-      message.reply('❌ An error occurred while stopping playback!');
+      message.reply(language.messages.error);
     }
   }
 };

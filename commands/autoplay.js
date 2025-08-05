@@ -7,35 +7,36 @@ module.exports = {
   description: 'Toggle autoplay mode',
   cooldown: 2,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     try {
       const autoplay = queue.toggleAutoplay();
+      const botConfig = client.botConfig;
       
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
-        .setTitle('🔄 Autoplay Toggled')
-        .setDescription(`Autoplay is now: **${autoplay ? 'Enabled' : 'Disabled'}**`)
+        .setTitle(botConfig.language === 'ar' ? '🔄 تم تبديل التشغيل التلقائي' : '🔄 Autoplay Toggled')
+        .setDescription(`${language.messages.autoplayToggled} **${autoplay ? (botConfig.language === 'ar' ? 'مفعل' : 'Enabled') : (botConfig.language === 'ar' ? 'معطل' : 'Disabled')}**`)
         .setFooter({ text: config.embed.footer });
       
       message.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Autoplay command error:', error);
-      message.reply('❌ An error occurred while toggling autoplay!');
+      message.reply(language.messages.error);
     }
   }
 };

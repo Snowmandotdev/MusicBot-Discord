@@ -8,24 +8,25 @@ module.exports = {
   usage: '[off/song/queue]',
   cooldown: 2,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     const mode = args[0]?.toLowerCase();
     let newMode;
+    const botConfig = client.botConfig;
 
     if (!mode || mode === 'off') {
       newMode = 0;
@@ -34,23 +35,29 @@ module.exports = {
     } else if (mode === 'queue') {
       newMode = 2;
     } else {
-      return message.reply('❌ Invalid mode! Use: off, song, or queue');
+      const errorMsg = botConfig.language === 'ar' 
+        ? '❌ وضع غير صحيح! استخدم: إيقاف، أغنية، أو قائمة'
+        : '❌ Invalid mode! Use: off, song, or queue';
+      return message.reply(errorMsg);
     }
 
     try {
       queue.setRepeatMode(newMode);
       
-      const modeNames = ['Off', 'Song', 'Queue'];
+      const modeNames = botConfig.language === 'ar' 
+        ? ['إيقاف', 'أغنية', 'قائمة']
+        : ['Off', 'Song', 'Queue'];
+      
       const embed = new EmbedBuilder()
         .setColor(config.embed.color)
-        .setTitle('🔁 Loop Mode Changed')
-        .setDescription(`Loop mode set to: **${modeNames[newMode]}**`)
+        .setTitle(botConfig.language === 'ar' ? '🔁 تم تغيير وضع التكرار' : '🔁 Loop Mode Changed')
+        .setDescription(`${language.messages.loopModeChanged} **${modeNames[newMode]}**`)
         .setFooter({ text: config.embed.footer });
       
       message.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Loop command error:', error);
-      message.reply('❌ An error occurred while setting loop mode!');
+      message.reply(language.messages.error);
     }
   }
 };

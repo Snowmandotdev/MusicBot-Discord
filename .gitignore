@@ -60,3 +60,15 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Settings
+settings.json

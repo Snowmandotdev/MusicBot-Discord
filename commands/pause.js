@@ -7,33 +7,33 @@ module.exports = {
   description: 'Pause or resume the current song',
   cooldown: 2,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     try {
       if (queue.paused) {
         queue.resume();
-        message.reply('▶️ Resumed the song!');
+        message.reply(language.messages.playbackResumed);
       } else {
         queue.pause();
-        message.reply('⏸️ Paused the song!');
+        message.reply(language.messages.playbackPaused);
       }
     } catch (error) {
       console.error('Pause command error:', error);
-      message.reply('❌ An error occurred while pausing/resuming!');
+      message.reply(language.messages.error);
     }
   }
 };

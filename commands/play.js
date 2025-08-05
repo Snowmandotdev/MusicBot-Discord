@@ -6,21 +6,21 @@ module.exports = {
   aliases: ['p'],
   description: 'Play a song from YouTube, Spotify, or SoundCloud',
   usage: '<song name or URL>',
-  cooldown: config.cooldowns.play,
+  cooldown: 3,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to play music!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     const permissions = voiceChannel.permissionsFor(message.client.user);
     if (!permissions.has('Connect') || !permissions.has('Speak')) {
-      return message.reply('❌ I need permissions to join and speak in your voice channel!');
+      return message.reply(language.messages.noPermission);
     }
 
     if (!args.length) {
-      return message.reply('❌ Please provide a song name or URL!');
+      return message.reply(language.messages.needSongName);
     }
 
     const query = args.join(' ');
@@ -33,7 +33,7 @@ module.exports = {
       });
     } catch (error) {
       console.error('Play command error:', error);
-      message.reply('❌ An error occurred while trying to play the song!');
+      message.reply(language.messages.error);
     }
   }
 };

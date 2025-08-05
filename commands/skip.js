@@ -5,30 +5,30 @@ module.exports = {
   name: 'skip',
   aliases: ['s'],
   description: 'Skip the current song',
-  cooldown: config.cooldowns.skip,
+  cooldown: 1,
   guildOnly: true,
-  async execute(message, args, client) {
+  async execute(message, args, client, language) {
     const queue = client.distube.getQueue(message.guild.id);
     
     if (!queue) {
-      return message.reply('❌ There is nothing playing!');
+      return message.reply(language.messages.nothingPlaying);
     }
 
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
-      return message.reply('❌ You need to be in a voice channel to use this command!');
+      return message.reply(language.messages.notInVoiceChannel);
     }
 
     if (queue.voiceChannel.id !== voiceChannel.id) {
-      return message.reply('❌ You need to be in the same voice channel as the bot!');
+      return message.reply(language.messages.notInSameChannel);
     }
 
     try {
       await queue.skip();
-      message.reply('⏭️ Skipped the current song!');
+      message.reply(language.messages.songSkipped);
     } catch (error) {
       console.error('Skip command error:', error);
-      message.reply('❌ An error occurred while skipping the song!');
+      message.reply(language.messages.error);
     }
   }
 };

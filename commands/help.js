@@ -6,12 +6,12 @@ module.exports = {
   aliases: ['h', 'commands'],
   description: 'Show all available commands',
   cooldown: 3,
-  async execute(message, args, client) {
-    const commands = client.commands;
+  async execute(message, args, client, language) {
+    const botConfig = client.botConfig;
     const embed = new EmbedBuilder()
       .setColor(config.embed.color)
-      .setTitle('🎵 Music Bot Commands')
-      .setDescription('Here are all the available commands:')
+      .setTitle(botConfig.language === 'ar' ? '🎵 أوامر بوت الموسيقى' : '🎵 Music Bot Commands')
+      .setDescription(botConfig.language === 'ar' ? 'هنا جميع الأوامر المتاحة:' : 'Here are all the available commands:')
       .setFooter({ text: config.embed.footer });
 
     const musicCommands = [
@@ -30,20 +30,27 @@ module.exports = {
 
     let musicCommandsText = '';
     musicCommands.forEach(cmd => {
-      const aliases = cmd.aliases ? ` (${cmd.aliases.join(', ')})` : '';
-      const usage = cmd.usage ? ` \`${config.prefix}${cmd.name} ${cmd.usage}\`` : ` \`${config.prefix}${cmd.name}\``;
-      musicCommandsText += `**${cmd.name}**${aliases}\n${cmd.description}${usage}\n\n`;
+      const langCmd = language.commands[cmd.name];
+      const commandName = langCmd ? langCmd.name : cmd.name;
+      const aliases = langCmd?.aliases || cmd.aliases;
+      const aliasesText = aliases ? ` (${aliases.join(', ')})` : '';
+      const usage = langCmd?.usage || cmd.usage;
+      const usageText = usage ? ` \`${botConfig.prefix}${commandName} ${usage}\`` : ` \`${botConfig.prefix}${commandName}\``;
+      
+      musicCommandsText += `**${commandName}**${aliasesText}\n${langCmd?.description || cmd.description}${usageText}\n\n`;
     });
 
     embed.addFields({
-      name: '🎵 Music Commands',
+      name: botConfig.language === 'ar' ? '🎵 أوامر الموسيقى' : '🎵 Music Commands',
       value: musicCommandsText,
       inline: false
     });
 
     embed.addFields({
       name: '📝 Usage',
-      value: `Use \`${config.prefix}help [command]\` for detailed information about a specific command.`,
+      value: botConfig.language === 'ar' 
+        ? `استخدم \`${botConfig.prefix}help [أمر]\` للحصول على معلومات مفصلة عن أمر معين.`
+        : `Use \`${botConfig.prefix}help [command]\` for detailed information about a specific command.`,
       inline: false
     });
 
